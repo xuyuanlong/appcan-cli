@@ -59,25 +59,14 @@ var QPhoto = {
 	},
 	paiopen: function() {
 		QPhoto.type = "paiopen";
-		// uexCamera.cbOpen = QPhoto.browserAfter;
-		if(isIOS) {
-			uexCamera.openInternal(0, 100, function(fpath) {
+		uexCamera.cbOpen = function(a, b, fpath) {
 				var obj = {
 					data: [fpath]
 				}
 				QPhoto.browserAfter(null, null, JSON.stringify(obj));
-			});
-		} else {
-			uexCamera.cbOpen = function(a, b, fpath) {
-					var obj = {
-						data: [fpath]
-					}
-					QPhoto.browserAfter(null, null, JSON.stringify(obj));
-				}
-				// uexCamera.cbOpen = QPhoto.browserAfter;
-			uexCamera.open();
-		}
-
+			}
+			// uexCamera.cbOpen = QPhoto.browserAfter;
+		uexCamera.open();
 	},
 	imgopen: function() {
 		QPhoto.type = "imgopen";
@@ -138,7 +127,7 @@ var QPhoto = {
 				}
 				uexWindow.closeToast();
 				// if(QPhoto.isFile)
-				// uexWindow.toast("0", "5", QPhoto.fileSuccCount + "个文件上传成功" + errStr, 3000);
+					// uexWindow.toast("0", "5", QPhoto.fileSuccCount + "个文件上传成功" + errStr, 3000);
 				// else
 				if(!QPhoto.isFile)
 					uexWindow.toast("0", "5", QPhoto.fileSuccCount + "张照片上传成功" + errStr, 3000);
@@ -150,7 +139,7 @@ var QPhoto = {
 		uexUploaderMgr.onStatus = function(opCode, fileSize, percent, response, status) {
 			switch(status) {
 				case 0:
-					if(!QPhoto.isFile) {
+					if(!QPhoto.isFile){
 						percent = parseInt(100 / QPhoto.files.length) * QPhoto.index + parseInt(parseInt(100 / QPhoto.files.length) / 100 * percent);
 						uexWindow.toast("0", "5", percent + "%", 0);
 					}
@@ -192,9 +181,7 @@ var QPhoto = {
 				alert("创建上传对象失败");
 			}
 		}
-		if(!QPhoto.isFile) {
-			uexWindow.toast('1', '5', '正在上传...', '');
-		}
+		uexWindow.toast('1', '5', '正在上传...', '');
 		//alert("randOpId-->"+randOpId);
 		//alert("QPhoto.uploadHttp-->"+QPhoto.uploadHttp);
 		QPhoto.uploadHttp += (QPhoto.uploadHttp.indexOf("?") >= 0) ? "&" : "?";

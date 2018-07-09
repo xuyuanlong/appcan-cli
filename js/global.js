@@ -1,3 +1,18 @@
+/**
+ * list
+ * 错误函数
+ * ajax
+ * 加载动画方法
+ * 常用校验方法
+ * 窗口相关操作
+ * LS 缓存简单封装
+ * 事件处理相关工具类
+ * toast,alert,confirm,actionsheet
+ * [日历📅插件]
+ * 
+ */
+
+
 // 错误函数
 var _errors = {
 	template: function(type) {
@@ -159,15 +174,12 @@ var _ajax = $.ajax,
 			_ajaxMethod = _ajaxClone(_ajaxMethod),
 			token = LS.get('emmToken');
 		//!param.show && mask.showIt();
+
 		param.data = param.data || [{}];
 		param.success = param.success || function() {};
 		param.error = param.error || function() {};
 		param.complete = param.complete || function() {};
-/*		param.headers = param.headers || {
-			'lclmKey': LCLMKEY(),
-			'tste': Math.random()
-				// 'Host': 'pay.hjrich.cn',
-		};*/
+		/*	param.headers = param.headers || {};*/
 		_ajaxMethod.param = param;
 		_ajaxMethod.paramCache = $.extend({}, param);
 		var paramData = Object.prototype.toString.call(param.data) == '[object String]' ? JSON.parse(param.data) : param.data;
@@ -235,6 +247,8 @@ var _ajax = $.ajax,
 
 //window.$.ajax = _ajaxFilterWrap;
 window.appcan.request.ajax = _ajaxFilterWrap;
+
+// 加载动画方法
 var Load = {
 	loading: function(type) {
 		if(type == 0) {
@@ -256,7 +270,365 @@ var Load = {
 	}
 }
 
+// 常用校验方法
+var tools = {
+	/**
+	 * 判断是否为手机号码
+	 * @param strValue 校验的值
+	 * @returns {boolean}
+	 */
+	isMobile: function(strValue) {
+		if(!strValue)
+			return false;
+		var pattern = /^(13|14|15|16|17|18|19)[0-9]{9}$/;
+		return this.executeExp(pattern, strValue);
+	},
+	/**
+	 * 判断是否是邮箱
+	 * @param  校验的值
+	 * @return {Boolean} 
+	 */
+	isEmail: function(strValue) {
+		if(!strValue)
+			return false;
+		var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+		return pattern.test(strValue)
+	},
 
+	/**
+	 * 是否为汉字
+	 * @param  {[type]} str [description]
+	 * @return {[type]}     [description]
+	 */
+	checkChinese: function(str) {
+		var re = /^\s*$/g;
+		if(!re.exec(str)) {
+			return false;
+		} else
+			return true;
+	},
+	// 校验图片格式
+	checkPhoto: function(url) {
+		var index = url.lastIndexOf('.');
+		var photoType = url.substring(index + 1);
+		if(photoType != 'jpg' && photoType != 'png' && photoType != 'gif') {
+			return false;
+		}
+		return true;
+	},
+	// 校验车牌号
+	checkChinese: function(str) {
+		var re = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/;
+		if(!re.exec(str)) {
+			return false;
+		} else
+			return true;
+	},
+	// 校验固定电话是否正确
+	checkMobile2: function(str) {
+		var re = /^(0[0-9]{2,3}\-)([2-9][0-9]{6,7})+(\-[0-9]{1,4})?$/;
+		if(!re.exec(str)) {
+			return false;
+		} else
+			return true;
+	},
+
+	/**
+	 * 验证身份证的有效性
+	 * @param strValueo 身份证ID
+	 * @returns {boolean}
+	 */
+	isCardID: function(strValue) {
+		if(!strValue) {
+			return false;
+		}
+		strValue = strValue.toUpperCase();
+		var vcity = {
+			11: "北京",
+			12: "天津",
+			13: "河北",
+			14: "山西",
+			15: "内蒙古",
+			21: "辽宁",
+			22: "吉林",
+			23: "黑龙江",
+			31: "上海",
+			32: "江苏",
+			33: "浙江",
+			34: "安徽",
+			35: "福建",
+			36: "江西",
+			37: "山东",
+			41: "河南",
+			42: "湖北",
+			43: "湖南",
+			44: "广东",
+			45: "广西",
+			46: "海南",
+			50: "重庆",
+			51: "四川",
+			52: "贵州",
+			53: "云南",
+			54: "西藏",
+			61: "陕西",
+			62: "甘肃",
+			63: "青海",
+			64: "宁夏",
+			65: "新疆",
+			71: "台湾",
+			81: "香港",
+			82: "澳门",
+			91: "国外"
+		};
+		//校验长度，类型,身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X
+		var pattern = /(^\d{15}$)|(^\d{17}(\d|X)$)/;
+		if(tools.executeExp(pattern, strValue) === false) {
+			return false;
+		}
+		//检查省份
+		var province = strValue.substr(0, 2);
+		if(vcity[province] == undefined) {
+			return false;
+		}
+		//校验生日
+		var len = strValue.length;
+		//身份证15位时，次序为省（3位）市（3位）年（2位）月（2位）日（2位）校验位（3位），皆为数字
+		if(len == 15) {
+			var re_fifteen = /^(\d{6})(\d{2})(\d{2})(\d{2})(\d{3})$/;
+			var arr_data = strValue.match(re_fifteen);
+			var year = parseInt('19' + arr_data[2]);
+			var month = parseInt(arr_data[3]);
+			var day = parseInt(arr_data[4]);
+			var birthday = new Date('19' + year + '/' + month + '/' + day);
+			//var birthday = new Date();
+			birthday.setFullYear(year);
+			birthday.setMonth(month - 1);
+			birthday.setDate(day);
+			var now = new Date();
+			var now_year = now.getFullYear();
+			//年月日是否合理
+			if(birthday.getFullYear() == year && (birthday.getMonth() + 1) == month && birthday.getDate() == day) {
+				//判断年份的范围（3岁到100岁之间)
+				var time = now_year - year;
+				if(!(time >= 3 && time <= 100)) {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		//身份证18位时，次序为省（3位）市（3位）年（4位）月（2位）日（2位）校验位（4位），校验位末尾可能为X
+		if(len == 18) {
+			var re_eighteen = /^(\d{6})(\d{4})(\d{2})(\d{2})(\d{3})([0-9]|X)$/;
+			var arr_data = strValue.match(re_eighteen);
+			var year = parseInt(arr_data[2]);
+			var month = parseInt(arr_data[3]);
+			var day = parseInt(arr_data[4]);
+			var birthday = new Date(year + '/' + month + '/' + day);
+			//var birthday = new Date();
+			birthday.setFullYear(year);
+			birthday.setMonth(month - 1);
+			birthday.setDate(day);
+			var now = new Date();
+			var now_year = now.getFullYear();
+			//年月日是否合理
+			if(birthday.getFullYear() == year && (birthday.getMonth() + 1) == month && birthday.getDate() == day) {
+				//判断年份的范围（3岁到100岁之间)
+				var time = now_year - year;
+				if(!(time >= 3 && time <= 100)) {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		//检验位的检测
+		//15位转18位
+		if(strValue.length == 15) {
+			var arrInt = new Array(7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2);
+			var arrCh = new Array('1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2');
+			var cardTemp = 0,
+				i;
+			strValue = strValue.substr(0, 6) + '19' + strValue.substr(6, strValue.length - 6);
+			for(i = 0; i < 17; i++) {
+				cardTemp += strValue.substr(i, 1) * arrInt[i];
+			}
+			strValue += arrCh[cardTemp % 11];
+		}
+		if(strValue.length == 18) {
+			var arrInt = new Array(7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2);
+			var arrCh = new Array('1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2');
+			var cardTemp = 0,
+				i,
+				valnum;
+			for(i = 0; i < 17; i++) {
+				cardTemp += parseInt(strValue.substr(i, 1)) * arrInt[i];
+			}
+			valnum = arrCh[cardTemp % 11];
+			if(!(valnum == strValue.substr(17, 1))) {
+				return false;
+			}
+		}
+		return true;
+	},
+	/**
+	 * 获取距当前时间多少天的日期
+	 * @param now 当前时间
+	 * @param addDayCount 天数
+	 * @param sign 分隔符
+	 * @returns 2016-10-10
+	 */
+	getDateStr: function(now, addDayCount, sign) {
+		var dd = new Date(now);
+		dd.setDate(dd.getDate() + addDayCount * 1);
+		//获取AddDayCount天后的日期
+
+		var y = dd.getFullYear();
+		var m = dd.getMonth() + 1;
+		//获取当前月份的日期
+		var d = dd.getDate();
+		if(m < 10) {
+			m = "0" + m;
+		}
+		if(d < 10) {
+			d = "0" + d;
+		}
+		return y + sign + m + sign + d;
+	},
+	/**
+	 * 获取距当前月份
+	 * @param now 当前月份
+	 * @param addDayCount 天数
+	 * @param sign 分隔符
+	 * @returns 2016-10-10
+	 */
+	getMonthStr: function(now, addMonthCount, sign) {
+		var dd = new Date(now);
+		dd.setMonth(dd.getMonth() - addMonthCount * 1);
+		//获取AddDayCount天后的日期
+
+		var y = dd.getFullYear();
+		var m = dd.getMonth() + 1;
+		//获取当前月份的日期
+		if(m < 10) {
+			m = "0" + m;
+		}
+		return y + sign + m;
+	},
+	/**
+	 * 判断字符串是否为空
+	 * @param strValue 校验的值
+	 * @returns {boolean}
+	 */
+	isEmpty: function(strValue) {
+		strValue = jQuery.trim(strValue);
+		return strValue.length == 0;
+	},
+	/**
+	 * 判断字符串是否非空
+	 * @param strValue 校验的值
+	 * @returns {boolean}
+	 */
+	isNotEmpty: function(strValue) {
+		return !isEmpty(strValue);
+	},
+	/**
+	 * 执行正则表达式
+	 * @param pattern 校验的正则表达式
+	 * @param strValue 校验的值
+	 * @returns {boolean}
+	 */
+	executeExp: function(pattern, strValue) {
+		return pattern.test(strValue);
+	},
+	strToInt: function(strValue) {
+		while(strValue.length > 1 && strValue.substring(0, 1) == "0") {
+			strValue = strValue.substring(1, strValue.length);
+		}
+		return parseInt(strValue);
+	},
+	bankNoCheck: function(bankno) {
+		if(bankno.length < 16 || bankno.length > 19) {
+			//$("#banknoInfo").html("银行卡号长度必须在16到19之间");
+			return false;
+		}
+		var num = /^\d*$/; //全数字
+		if(!num.exec(bankno)) {
+			//$("#banknoInfo").html("银行卡号必须全为数字");
+			return false;
+		}
+		//开头6位
+		var strBin = "10,18,30,35,37,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,58,60,62,65,68,69,84,87,88,94,95,98,99";
+		if(strBin.indexOf(bankno.substring(0, 2)) == -1) {
+			//$("#banknoInfo").html("银行卡号开头6位不符合规范");
+			return false;
+		}
+		var lastNum = bankno.substr(bankno.length - 1, 1); //取出最后一位（与luhm进行比较）
+
+		var first15Num = bankno.substr(0, bankno.length - 1); //前15或18位
+		var newArr = new Array();
+		for(var i = first15Num.length - 1; i > -1; i--) { //前15或18位倒序存进数组
+			newArr.push(first15Num.substr(i, 1));
+		}
+		var arrJiShu = new Array(); //奇数位*2的积 <9
+		var arrJiShu2 = new Array(); //奇数位*2的积 >9
+
+		var arrOuShu = new Array(); //偶数位数组
+		for(var j = 0; j < newArr.length; j++) {
+			if((j + 1) % 2 == 1) { //奇数位
+				if(parseInt(newArr[j]) * 2 < 9)
+					arrJiShu.push(parseInt(newArr[j]) * 2);
+				else
+					arrJiShu2.push(parseInt(newArr[j]) * 2);
+			} else //偶数位
+				arrOuShu.push(newArr[j]);
+		}
+
+		var jishu_child1 = new Array(); //奇数位*2 >9 的分割之后的数组个位数
+		var jishu_child2 = new Array(); //奇数位*2 >9 的分割之后的数组十位数
+		for(var h = 0; h < arrJiShu2.length; h++) {
+			jishu_child1.push(parseInt(arrJiShu2[h]) % 10);
+			jishu_child2.push(parseInt(arrJiShu2[h]) / 10);
+		}
+
+		var sumJiShu = 0; //奇数位*2 < 9 的数组之和
+		var sumOuShu = 0; //偶数位数组之和
+		var sumJiShuChild1 = 0; //奇数位*2 >9 的分割之后的数组个位数之和
+		var sumJiShuChild2 = 0; //奇数位*2 >9 的分割之后的数组十位数之和
+		var sumTotal = 0;
+		for(var m = 0; m < arrJiShu.length; m++) {
+			sumJiShu = sumJiShu + parseInt(arrJiShu[m]);
+		}
+
+		for(var n = 0; n < arrOuShu.length; n++) {
+			sumOuShu = sumOuShu + parseInt(arrOuShu[n]);
+		}
+
+		for(var p = 0; p < jishu_child1.length; p++) {
+			sumJiShuChild1 = sumJiShuChild1 + parseInt(jishu_child1[p]);
+			sumJiShuChild2 = sumJiShuChild2 + parseInt(jishu_child2[p]);
+		}
+		//计算总和
+		sumTotal = parseInt(sumJiShu) + parseInt(sumOuShu) + parseInt(sumJiShuChild1) + parseInt(sumJiShuChild2);
+
+		//计算Luhm值
+		var k = parseInt(sumTotal) % 10 == 0 ? 10 : parseInt(sumTotal) % 10;
+		var luhm = 10 - k;
+
+		if(lastNum == luhm) {
+			// $("#banknoInfo").html("Luhm验证通过");
+			return true;
+		} else {
+			// $("#banknoInfo").html("银行卡号必须符合Luhm校验");
+			return false;
+		}
+	}
+}
+
+
+/**
+ * 窗口相关操作
+ */
 
 //打开新窗口
 function openWin(id, url, animID, w, h, flag, animDuration) {
@@ -290,7 +662,7 @@ function openWin(id, url, animID, w, h, flag, animDuration) {
 		animDuration = 200; //动画持续毫秒
 	}
 	animID = 10;
-	
+
 	saveNowWinName();
 	appcan.window.open(id, url, 10);
 }
@@ -326,7 +698,7 @@ function openWinOffAm(id, url, animID, w, h, flag, animDuration) {
 		animDuration = 0; //动画持续毫秒
 	}
 	animID = 10;
-	
+
 	saveNowWinName();
 	uexWindow.open(id, "0", url, 0, w, h, flag, animDuration);
 }
@@ -339,13 +711,13 @@ function closeWin(animID, animDuration) {
 	if(typeof animDuration !== "number") {
 		animDuration = 260; //动画持续毫秒
 	}
-	
+
 	deleteOldWinName();
 	uexWindow.close(animID, animDuration);
 }
 
 // 存下当前页面的name
-function saveNowWinName(){
+function saveNowWinName() {
 	var _oldWindows = LS.get('oldWindows') || [];
 	var _nowWindowName = window.name;
 	var _nowName = _nowWindowName.split('_')[1];
@@ -355,50 +727,27 @@ function saveNowWinName(){
 }
 
 // 关闭页面并删除页面name
-function deleteOldWinName(){
+function deleteOldWinName() {
 	var _oldWindows = LS.get('oldWindows') || [];
 	var _nowWindowName = window.name;
 	var _nowName = _nowWindowName.split('_')[1];
 	_oldWindows = deleteArrItem(_oldWindows, _nowName);
 	LS.set('oldWindows', _oldWindows);
-	
+
 	preWinRefesh(_oldWindows);
 }
 
 // 页面显示刷新onShow
-function preWinRefesh(arr){
-	var _nowName = arr[arr.length-1];
+function preWinRefesh(arr) {
+	var _nowName = arr[arr.length - 1];
 	evalScript(_nowName, 'Event.onShow && Event.onShow()');
 }
 
-// 删除数组元素
-function deleteArrItem(arr, val){
-	var len = arr.length;
-	for(var i=0; i<len; i++) {
-	    if(arr[i] == val) {
-	      arr.splice(i, 1);
-	      break;
-	    }
-	}
-	return arr;
-}
 
-// 小于10的数字前面加个0
-function lessTen(num){
-	var newNum = parseInt(num);
-	if(newNum < 10){
-		newNum = '0' + newNum;
-	}
-	return newNum;
-}
 
 //执行主窗口方法
 function evalScript(windName, js) {
-    uexWindow.evaluateScript({
-		name: windName, 
-		type: 0, 
-		js: js
-	});
+	uexWindow.evaluateScript(windName, 0, js);
 }
 
 /**
@@ -417,7 +766,7 @@ function evalScript(windName, js) {
 			get: function(key, statu) {
 				var val = appcan.getLocVal(key);
 				// 直接清除缓存
-				statu && appcan.locStorage.remove(key); 
+				statu && appcan.locStorage.remove(key);
 				if(/\[|\{/.test(val)) val = JSON.parse(val);
 				return val;
 			},
@@ -432,7 +781,6 @@ function evalScript(windName, js) {
 		};
 	exports = Object.assign ? Object.assign(exports, _export) : $.extend(exports, _export);
 })((function() {
-	
 	if(typeof exports === 'undefined') {
 		window.LS = {};
 		return window.LS;
@@ -592,510 +940,342 @@ var EventUtil = (function() {
 	}
 }());
 
-+
-(function(exports) {
-	var utils = {
-			//验证邮箱
-			validateEmail: function(email) {
-				var emailPat = /^(.+)@(.+)$/;
-				return !!email.match(emailPat);
-			},
-			// 取数据类型
-			type: function(arg) {
-				return Object.prototype.toString.call(arg).replace('[object ', '').replace(']', '').toLowerCase();
-			},
-			arc: function(domJQ, activeClass, notClass) {
-				if(!domJQ) throw new Error('domJQ was not found on the page.');
-				if(!activeClass) throw new Error('activeClass was must be required');
-				var cache;
-				if(notClass) {
-					if(utils.type(notClass) == 'array') {
-						cache = domJQ.addClass(activeClass).siblings();
-						_.forEach(notClass, function(_class, index) {
-							cache = cache.not(_class);
-						});
-						cache.removeClass(activeClass);
-					} else {
-						domJQ.addClass(activeClass).siblings().not(notClass).removeClass(activeClass);
-					}
-				} else domJQ.addClass(activeClass).siblings().removeClass(activeClass);
-			},
-			ar: function(domJQ, removeClass, notClass) {
-				if(!domJQ) throw new Error('domJQ was not found on the page.');
-				if(!removeClass) throw new Error('removeClass was must be required');
-				var cache;
-				if(notClass) {
-					if(utils.type(notClass) == 'array') {
-						cache = domJQ.removeClass(removeClass).siblings();
-						_.forEach(notClass, function(_class, index) {
-							cache = cache.not(_class);
-						});
-						cache.addClass(removeClass);
-					} else {
-						domJQ.removeClass(removeClass).siblings().not(notClass).addClass(removeClass);
-					}
 
-				} else domJQ.removeClass(removeClass).siblings().addClass(removeClass);
-			},
-			/**
-			 * [before this was the aop design pattern]
-			 * @param  {[type]} self    [description]
-			 * @param  {[type]} _before [description]
-			 * @return {[type]}         [description]
-			 */
-			before: function(_beforeFn, currentFn) {
-				return function() {
-					if(_beforeFn.apply(this, arguments) === false) return;
-					currentFn.apply(this, arguments)
-				}();
-			},
-			delOne: function(array, val) {
-				var index = (array || []).indexOf(val);
-				if(~index) array.splice(index, 1);
-			},
-			addOne: function(array, val) {
-				_log('index: ' + array.indexOf(val));
-				if(!~array.indexOf(val)) array.push(val);
-			},
-			// 获取当前的css样式值
-			cssVal: function(jq, _css) {
-				var _str = jq.css(_css);
-				var _num = parseFloat(_str.replace('em', '').replace('px', '').replace('rem', '') || '0').toFixed(2);
-				var _unit = _str.replace(/[^a-zA-Z]/g,'');
-				if(_unit == 'em' || _unit == 'rem') {
-					_num = _num * parseFloat($('body').css('font-size')).toFixed(2);
-				}
-				return _num;
-			},
-			// 金额比较
-			compare: {
-				big: function(prev, next) {
-					if(isNaN(prev)) return toast(prev + ' 不是一个数值');
-					if(isNaN(next)) return toast(next + ' 不是一个数值');
-					return parseFloat(prev || 0) > parseFloat(next || 0);
-				}
-			},
-			// jq对象备用
-			getJQ: function(baseJQ, backupJQ) {
-				return baseJQ[0] ? baseJQ : backupJQ;
-			},
-			// 处理ios样式
-			handleIosStyle: function() {
-				var _bodyFot = utils.cssVal($('body'), 'font-size');
-	
-				// ios下Header_5样式
-				var _headDom = $('#Header_5');
-				if(_headDom[0]){
-					var _headH = utils.cssVal(_headDom, 'height');
-					var ios_headH = _headH/_bodyFot + 1;
-					_headDom.css({
-						'height': ios_headH  + 'em',
-						'padding-top': '1em'
-					});
-				}
-				
-				// ios下HeaderBox_5样式
-				var _headBoxDom = $('#HeaderBox_5');
-				if(_headBoxDom[0]){
-					var _headBoxT = utils.cssVal(_headBoxDom, 'top');
-					var ios_headBoxH = _headBoxT/_bodyFot + 1;
-					_headBoxDom.css({
-						'top': ios_headBoxH + 'em'
-					});
-				}
-				
-				// ios下ScrollContent_5样式
-				var _scrollContentDom = $('#ScrollContent_5');
-				if(_scrollContentDom[0]){
-					var _scrollContentP_t = utils.cssVal(_scrollContentDom, 'padding-top');
-					var ios_scrollContentP_t = _scrollContentP_t/_bodyFot + 1;
-					_scrollContentDom.css({
-						'padding-top': ios_scrollContentP_t + 'em'
-					});
-				}
-				
-				// ios下iosPopBox弹框样式
-				var _iosPopBoxDom = $('.iosPopBox');
-				if(_iosPopBoxDom[0]){
-					var _iosPopBox_t = utils.cssVal(_iosPopBoxDom, 'top');
-					var ios_iosPopBox_t = _iosPopBox_t/_bodyFot + 1;
-					_iosPopBoxDom.css({
-						'top': ios_iosPopBox_t + 'em'
-					});
-				}
-			},
-			// 处理富文本字体问题
-			handleFontSize: function(str) {
-				var result = str;
-				result = result.replace(/font-size:.*?px/ig, function(tag) {
-					return 'font-size:1em';
-				});
-				result = result.replace(/line-height:.*?px/ig, function(tag) {
-					return 'line-height:1em';
-				});
-				result = HtmlCode.de(result).replace(' ', '');
-				return result;
-			},
-			// 没有数据的展示
-			handleNoDataShow: function(res, selector, isShowPanel) {
-				if(res && res.length == 0) {
-					_errors.show('暂时没有相关内容...', isShowPanel, false);
-					disablePullUp();
-					return;
-				}
-				var activeJQ = $('.ubb2-active'),
-					res = (res || [{}]),
-					length = res.length,
-					activeIndex = activeJQ.data('index');
-				if(length == 1 && Object.keys(res[0]).length == 0) {
-					disablePullUp();
-					_errors.show('暂时没有相关内容...', isShowPanel, false);
-					return;
-					// utils.arc($(selector || '#pane'+activeIndex+'none'), 'active');
-				}
-				enablePullUp();
-			},
-			hasNoData: function(resp) {
-				var isArray = this.type(resp) == 'array';
-				return !resp || (isArray && resp.length == 0) || (isArray && Object.keys(resp[0]) == 0);
-			},
-			// 空图片处理
-			handleImgEmpty: function() {
-				$('img').each(function(index, element) {
-					var _this = $(element),
-						_src = _this.attr('src');
-					if(!_src) {
-						_this.attr('src', constant.defaultImage);
-					}
-				})
-			},
-			// 上传图片数据的处理
-			handleImageData: function(res) {
-				var array = [];
-				if(_.isArray(res)) {
-					$.each(res, function(i, item) {
-						array.push(res[i].result.url);
-					});
-				} else {
-					array.push(res.result.url);
-				}
-				return array;
-			},
-			// 图片处理
-			imgUrl: function(_imgUrl) {
-				if(_imgUrl) {
-					if(~_imgUrl.indexOf('/upload')) return _imgUrl;
-					return constant.IMG_PATH + _imgUrl;
-				} else {
-					return ''; // TODO: default img url
-				}
-			},
 
-			thumbnail: function(_imgUrl) {
-				if(_imgUrl) {
-					var url = '';
-					if(~_imgUrl.indexOf('/upload'))
-						url = _imgUrl;
-					else
-						url = constant.IMG_PATH + _imgUrl;
-					var splitIndex = url.lastIndexOf(".");
-					url = url.substr(0, splitIndex) + '_thumbnail' + url.substr(splitIndex);
-					return url;
-					// return _imgUrl;
-					// return 
-				} else {
-					return ''; // TODO: default img url
-				}
-			},
 
-			loadImage: function(url, callback, errorCallback) {
-				if(!url) {
-					log('loadImage(): url can not be null!');
-					return false;
-				}
-				var img = new Image();
-				if(/msie/.test(window.navigator.userAgent.toLowerCase())) { // IE
-					img.onreadystatechange = function() {
-						if(img.readyState == "complete" || img.readyState == "loaded") {
-							callback && callback.call(this, {
-								height: img.height,
-								width: img.width
-							});
-						}
-					}
-				} else {
-					img.onload = function() {
-						if(img.complete == true) {
-							callback && callback.call(this, {
-								height: img.height,
-								width: img.width
-							});
-						}
-					}
-				}
-				img.onerror = function() {
-					errorCallback && errorCallback.call(this);
-				}
-				img.src = url;
-			},
-			swipe: function(ele, leftCallback, rightCallback) { // type: 'left', 'right'
-				var touch = {
-					boundary: 5,
-					isLeft: false,
-					isRight: false
-				};
-				if(!ele) ele = document;
-				ele.addEventListener('touchstart', function(evt) {
-					touch.isLeft = false;
-					touch.isRight = false;
-					touch.startX = evt.touches[0].pageX;
-				})
-				ele.addEventListener('touchmove', function(evt) {
-					touch.endX = evt.touches[0].pageX;
-					var moveBoundary = touch.endX - touch.startX;
-					if(Math.abs(moveBoundary) > touch.boundary) {
-						if(moveBoundary < 0) {
-							touch.isLeft = true;
-						} else if(moveBoundary > 0) {
-							touch.isRight = true;
-						}
-					}
-				});
-				ele.addEventListener('touchend', function(evt) {
-					if(touch.isLeft)
-						leftCallback && leftCallback.call(this);
-					if(touch.isRight)
-						rightCallback && rightCallback.call(this);
-				});
-			}
-		},
-		_export = utils;
-	exports = Object.assign ? Object.assign(exports, _export) : $.extend(exports, _export);
-})((function() {
-	if(typeof exports === 'undefined') {
-		window.utils = {};
-		return window.utils;
-	} else {
-		return exports;
-	}
-})());
+/** 提示 alert、toast、confirm ... */
 
-/** 
- * ios样式问题 **/
+//关闭toast
+function closeToast() {
+	uexWindow.closeToast();
+}
 
-appcan.ready(function() {
-	var fontsize = $("body").css("font-size");
-	var _newSize = parseInt(fontsize)*0.85;
-	$("body").css("font-size", parseInt(_newSize) + 'px !important');
-	
-	var ios7style=uexWidgetOne.iOS7Style;
-    var isFullScreen = uexWidgetOne.isFullScreen;
-    if (ios7style == '1' && isFullScreen != '1' && isIOS) {
-      $("body").addClass("uh_ios7");
-      utils.handleIosStyle();
-    }
-});
-
-/**
- * myCharts 隐藏提示框的
- */
-
-function myChartsHideTip(myChart, unm) {
-	$("body").on("touchend", function() {
-		myChart.dispatchAction({
-			type: 'showTip',
-			// 系列的 index，在 tooltip 的 trigger 为 axis 的时候可选。
-			seriesIndex: unm,
-			// 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-			dataIndex: 0,
-		})
+// 重写alert
+window.alert = function() {
+	var argOne = arguments[0],
+		argType = Object.prototype.toString.call(argOne);
+	argOne = argType == '[object Object]' || argType == '[object Array]' ? JSON.stringify(argOne) : argOne;
+	appcan.window.alert({
+		title: '提示',
+		buttons: ['确定'],
+		content: argOne,
+		callback: function(){}
 	});
 }
 
+function confirm2(cb, message, title, buttonLable) {
+	//confirm确认选择
+	if(typeof cb !== 'function') {
+		alert('缺少回调函数');
+		return;
+	}
+	if(typeof uexWindow === 'undefined') {
+		var r = confirm(message);
+		if(cb) {
+			cb(r);
+		}
+		return;
+	}
+	if(!message) {
+		var message = '确认执行此操作？'
+	}
+	if(!title) {
+		var title = '提示';
+	}
+	if(!buttonLable) {
+		var buttonLable = ['确定', '取消'];
+	}
+	uexWindow.cbConfirm = function(opId, dataType, data) {
+		console.log('您选择了第 %s 项', data);
+		cb(data);
+	}
+	uexWindow.confirm(title, message, buttonLable);
+}
+
+//toast提示
+function toast(msg, duration, location, type) {
+	var locationObj = {
+		"leftTop": 1,
+		"top": 2,
+		"rightTop": 3,
+		"left": 4,
+		"middle": 5,
+		"right": 6,
+		"bottomLeft": 7,
+		"bottom": 8,
+		"bottomRight": 9
+	}
+	if(!msg) {
+		msg = '提示';
+	}
+	if(!duration) {
+		duration = 3000;
+	}
+	if(!location) {
+		location = 5; //默认居中显示
+	}
+	if(locationObj[location]) {
+		location = locationObj[location];
+	}
+	if(!type) {
+		type = 0;
+	}
+	if(typeof type !== 'number' && duration === 0) {
+		type = 1;
+	} else {
+		type = 0;
+	}
+	uexWindow.toast(type, location, msg, duration);
+}
+
+function actionSheet(cb, buttonLables, cancel, title) {
+    if (typeof cb !== 'function') {
+        alert('缺少回调函数');
+        return;
+    }
+    if (!cancel) {
+        cancel = '取消'
+    }
+    if (!title) {
+        title = '';
+    }
+    if (!buttonLables) {
+        buttonLables = ['演示选项一', '演示选项二', '演示选项三']
+    }
+    uexWindow.cbActionSheet = function(opId, dataType, data) {
+        console.log('您选择了第 %s 项', data);
+        cb(data);
+    }
+    uexWindow.actionSheet(title, cancel, buttonLables);
+}
+
+
 /**
- * [type appcan工具扩展]
- * @param  {[type]}  )         {                                                     return Object.prototype.toString.call(arguments[0]).replace('[object ',     '').replace(']',                             '').toLowerCase();        } [description]
- * @param  {Boolean} isArray:  function      () {                                                                                                         return Object.prototype.toString.call(arguments[0]) [description]
- * @param  {Boolean} isFunc:   function      () {                                                                                                         return Object.prototype.toString.call(arguments[0]) [description]
- * @param  {Boolean} isObject: function      () {                                                                                                         return Object.prototype.toString.call(arguments[0]) [description]
- * @param  {Boolean} isString: function      () {                                                                                                         return Object.prototype.toString.call(arguments[0]) [description]
- * @param  {String}  v:        {                        buttons: function(opts, ele) {                                                                                                                                                 if (Object.prototype.toString.call(opts) ! [description]
- * @return {[type]}            [description]
+ * [日历📅插件]
+ *
+ * api:
+ * http://newdocx.appcan.cn/plugin-API/system/uexControl
+ *
+ * usage:
+ * <1>.html==>
+ * <div onclick="appcan.date.init({ele: this, format: 'yyyy-MM-dd hh:mm:ss.S'})" id="startDate"></div>
+ * <div onclick="appcan.date.init({format: 'yyyy-MM-dd hh:mm:ss.S'})" id="startDate"></div>
+ * <div onclick="appcan.date.init()" id="startDate"></div>
+ * <div onclick="appcan.date.init({isTime: true})" id="startDate"></div>
+ *
+ * <2>.js====>
+ * appcan.date.format(new Date(), 'yyyy-MM-dd hh:mm:ss.S');
+ * appcan.date.getDateRelative(new Date(), 1);
+ * appcan.date.getWeekday(new Date());
+ * appcan.date.getMonthAndDay(new Date());
+ * appcan.date.getDateYearMonthDay(new Date());
+ * appcan.date.getWeekdayByZhou(new Date());
+ *
+ * @param  {[type]} $         [description]
+ * @param  {[type]} exports   [description]
+ * @param  {Object} module){                 var date [description]
+ * @return {[type]}           [description]
  */
-appcan.extend({
-    u: {
-        type: function() {
-            return Object.prototype.toString.call(arguments[0]).replace('[object ', '').replace(']', '').toLowerCase();
-        },
-        isArray: function() {
-            return Object.prototype.toString.call(arguments[0]) === '[object Array]';
-        },
-        isFunc: function() {
-            return Object.prototype.toString.call(arguments[0]) === '[object Function]';
-        },
-        isObject: function() {
-            return Object.prototype.toString.call(arguments[0]) === '[object Object]';
-        },
-        isString: function() {
-            return Object.prototype.toString.call(arguments[0]) === '[object String]';
-        }
-    },
-    v: {
-        /**
-         * [btns buttons事件的优化版, key为selector, value为selector要绑定的事件]
-         * @param  {[type]} opts [description]
-         * @return {[type]}      [description]
-         */
-        btns: function(opts, anim) {
-            if (appcan.u.type(opts) != 'object') throw new Error('btns(): opts should be an object!');
-            var key,
-                val;
-            for (key in opts) {
-                val = opts[key];
-                (function(key, val) {
-                    if(!~key.indexOf('#') && !~key.indexOf('.')){
-                        if($('#' + key)[0]) key = ('#' + key);
-                        else if($('.' + key)[0]) key = ('.' + key);
-                        else throw new Error('selector was not found, please check your selector can be found in the document html');
-                    }
-                    if(!anim) {anim = 'ani-act';}
-                    appcan.button(key, anim, function() {
-                        val && appcan.u.type(val) == 'function' && val.call(this);
-                    });
-                })(key, val);
-            }
-        }
-    },
-    c: { // 窗口通讯相关
-        _handle: {
-            object: function(receiveKey, jsonObject) {
-                var keys = Object.keys(receiveKey);
-                _.some(jsonObject, function(callback, key) {
-                    if (~keys.indexOf(key)) {
-                        callback && appcan.u.isFunc(callback) && callback.call(this, receiveKey[key]);
-                    }
-                });
-            },
-            string: function(receiveKey, jsonObject) {
-                _.some(jsonObject, function(callback, key) {
-                    // if(receiveKey.indexOf('\"')) receiveKey = receiveKey.replace(/"/g, '');
-                    // if(receiveKey.indexOf('\''))receiveKey = receiveKey.replace(/'/g, '');
-                    if (key == receiveKey) {
-                        callback && appcan.u.isFunc(callback) && callback.call(this);
-                        return true;
-                    }
-                });
+appcan.define('date', function ($, exports, module) {
+    var MDate = {
+        errorHandle: function () {
+            var date = new Date();
+            return {
+                year: date.getFullYear(),
+                month: date.getMonth(),
+                day: date.getDate()
             }
         },
         /**
-         * [sub 订阅一个频道，如果有消息发给该频道，则会执行响应的回调]
-         * @param {[type]} channelID [频道名称]
-         * @param {[type]} jsonObject     [绑定的执行的回调的json对象]
+         * [init description]
+         * @param  {[type]} param [{el: dom, format: 'yyyy/MM/dd'}]
+         * @return {[type]}       [description]
          */
-        sub: function(channelID, jsonObject) {
+        init: function (param) {
+            param = param || {};
+            var self = this,
+                date,
+                caller = MDate.init.caller, // may be cause bug
+                event = window.event ? window.event : caller.arguments[0],
+                target = param && param.ele ? param.ele : event.target || event.srcElement || {},
+                $this = $(target),
+                targetText = $this.text() || $this.val();
 
-            var _handle = this._handle;
+            if (!self.caller) self.caller = caller;
 
-            appcan.window.subscribe(channelID, function(receiveKey) {
-                try {
-                    receiveKey = JSON.parse(receiveKey); //appcan.u.isObject(receiveKey) ? JSON.parse(receiveKey) : receiveKey;
-                    if (appcan.u.isObject(receiveKey)) {
-                        _handle.object(receiveKey, jsonObject);
-                    } else if (appcan.u.isString(receiveKey)) {
-                        _handle.string(receiveKey, jsonObject);
-                    } else {
-                        console && console.info('this type of receiveKey was developing, please wait for a moment!');
+
+            param.format = param.format || 'yyyy/MM/dd';
+
+            // param = $.extend(_default, param);
+            try {
+                var dates = targetText.split('/');
+                date = {
+                    year: dates[0],
+                    month: dates[1],
+                    day: dates[2]
+                };
+                // alert(JSON.stringify(param.ele));
+                // alert(JSON.stringify(date));
+            } catch (e) {
+                date = self.errorHandle();
+                // alert('get text value error: ' + JSON.stringify(e));
+            }
+
+            if (!isPhone) return; // did not run on the simular platform
+
+            self.caller.isOpen = true;
+
+            // alert(JSON.stringify(param));
+            uexControl.openDatePicker(date.year, date.month, date.day);
+            appcan.ready(function () {
+                uexControl.cbOpenDatePicker = function (opId, dataType, data) {
+                    try {
+                        var resultDate = new Date();
+                        if (data) {
+                            data = JSON.parse(data);
+                            // alert(JSON.stringify(data));
+                            // alert(JSON.stringify(param));
+                            // $this.text(data.year+'/'+data.month+'/'+data.day);
+                            resultDate.setFullYear(parseInt(data.year));
+                            resultDate.setMonth(parseInt(data.month) - 1);
+                            resultDate.setDate(parseInt(data.day));
+                        }
+                        var showDate = self.format(resultDate, param.format);
+                        // alert(showDate);
+                        if(param.isTime){
+                            MDate.continueTime(showDate, $this);
+                        }else{
+                            $this.text(showDate);
+                            $this.val(showDate);
+                        }
+                    } catch (e) {
+                        // alert(JSON.stringify(e));
+                        var showDate = self.format(new Date(), param.format);
+                        if(param.isTime){
+                            MDate.continueTime(showDate, $this);
+                        }else{
+                            $this.text(showDate);
+                            $this.val(showDate);
+                        }
                     }
-                } catch (e) {
-                    // if there are some error, handle this condition as string
-                    _handle.string(receiveKey, jsonObject);
-                    console.error(e);
                 }
+            })
+        },
+        // 继续选择时间
+        continueTime: function (showDate, $this) {
+            var _date = new Date(),
+                _hour = _date.getHours(),
+                _minute = _date.getMinutes();
+            uexControl.openTimePicker(_hour, _minute, function(data) {
+            	if(data.hour<10){data.hour='0'+data.hour}
+            	if(data.minute<10){data.minute='0'+data.minute}
+                showDate = showDate + ' ' + data.hour + ':' + data.minute;
+                $this.text(showDate);
+                $this.val(showDate);
             });
         },
         /**
-         * [SendNotification 向指定通道发送消息]
-         * @param {[String]} channelID [频道名称]
-         * @param {[String]} key      [发送的消息]
+         * [format 日期格式化
+         * (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423
+         * (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18
+         * ]
+         * @param  {[type]} _date [description]
+         * @param  {[type]} fmt   [description]
+         * @return {[type]}       [description]
          */
-        pub: function(channelID, key) {
-            appcan.window.publish(channelID, JSON.stringify(key)); // appcan.u.isObject(key) ? JSON.stringify(key) : key
+        format: function (_date, fmt) {
+            if (utils.type(_date) == 'date'){
+
+            }else if(utils.type(_date) == 'string'){
+                if(_date && !~_date.indexOf('T') && ~_date.indexOf('-')){
+                    _date = _date.replace(/-/g, '/');
+                    if(~_date.indexOf('.0')){
+                        _date = _date.replace('.0', '');
+                    }
+                }
+                _date = new Date(_date);
+            }else{
+                // console.error('_date type was not found');
+                return '';
+            }
+            var o = {
+                "M+": (_date.getMonth() + 1), //月份  + 1
+                "d+": _date.getDate(), //日
+                "h+": _date.getHours(), //小时
+                "m+": _date.getMinutes(), //分
+                "s+": _date.getSeconds(), //秒
+                "q+": Math.floor((_date.getMonth() + 3) / 3), //季度
+                "S": _date.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (_date.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
         }
-    }
+    }, _exportMore = {
+        /**
+         * [getDateRelative 获得相对日期]
+         * @param  {[type]} date     [description]
+         * @param  {[type]} dayCount [description]
+         * @return {[type]}          [description]
+         */
+        getDateRelative: function (date, dayCount) {
+            date.setTime(date.getTime() + dayCount * 24 * 60 * 60 * 1000);
+            return date;
+        },
+        /**
+         * [getWeekday ]
+         * @param  {[type]} date [description]
+         * @return {[type]}      [description]
+         */
+        getWeekday: function (date) {
+            var weekday = date.getDay();
+            // console.log('weekday = ' + weekday);
+            var dayChineseArray = ['天', '一', '二', '三', '四', '五', '六'];
+            var dayChinese = dayChineseArray[weekday];
+            // console.log('星期' + dayChinese);
+            return '星期' + dayChinese;
+        },
+        /**
+         * [getMonthAndDay 获得日期]
+         * @param  {[type]} date [description]
+         * @return {[type]}      [description]
+         */
+        getMonthAndDay: function (date) {
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            // console.log(month + '月' + day + '日');
+            return month + '月' + day + '日';
+        },
+        /**
+         * [getDateYearMonthDay 获得日期]
+         * @param  {[type]} date [description]
+         * @return {[type]}      [description]
+         */
+        getDateYearMonthDay: function (date) {
+            var dateStr = date.toLocaleDateString(date);
+            dateStr = dateStr.replace(/\//g, '-');
+            // console.log(dateStr);
+            return dateStr;
+        },
+        /**
+         * [getWeekdayByZhou 获得周几]
+         * @param  {[type]} date [description]
+         * @return {[type]}      [description]
+         */
+        getWeekdayByZhou: function (date) {
+            var weekday = date.getDay();
+            // console.log('weekday = ' + weekday);
+            var dayChineseArray = ['天', '一', '二', '三', '四', '五', '六'];
+            var dayChinese = dayChineseArray[weekday];
+            // console.log('周' + dayChinese);
+            return '周' + dayChinese;
+        }
+    };
+    var _export = {
+        init: MDate.init, //.bind(this), // .bind(MDate)
+        format: MDate.format
+    };
+    _export = Object.assign ? Object.assign(_export, _exportMore) : $.extend(_export, _exportMore);
+    exports = Object.assign ? Object.assign(exports, _export) : $.extend(exports, _export);
 });
-/**
- * *
- * @param  {[type]} id                   [通讯的通道id]
- * @param  {[type]} callback)            [订阅通讯的回调]
- * @param  {[type]} pub:function(id,msg) [description]
- * @return {[type]}                      [description]
- */
-appcan.extend({
-	sub: function(id,callback) {
-		appcan.window.subscribe(id,function(res) {
-			callback && callback(res);
-		})
-	},
-	pub:function(id,msg) {
-		appcan.window.publish(id, JSON.stringify(msg));
-	}
-})
-
-
-
-// 验证码倒计时
-function getCodeTime(){
-	setTimeout(function() {
-		$('.codeBtn').addClass('getCodeBtnDisabled');
-		$('.countdown').removeClass('uhide');
-		$('.getCode').text('s后重新获取');
-	    var time = $(".countdown").text();
-	    if (time == 1) {
-	    	$('.countdown').text(60);
-	        $('.countdown').addClass('uhide');
-	        $('.getCode').text('获取验证码');
-	        $('.codeBtn').removeClass('getCodeBtnDisabled');
-	    } else {
-	        $(".countdown").text(time - 1);
-	        getCodeTime();
-	    }
-  }, 1000);
-}
-$('.countdown').text(60);
-
-
-function getDateDiff(dateTimeStamp){
-	dateTimeStamp = new Date(dateTimeStamp).getTime();
-	var minute = 1000 * 60,
-		hour = minute * 60,
-		day = hour * 24, 
-		halfamonth = day * 15,
-		month = day * 30,
-		now = new Date().getTime(),
-		diffValue = now - dateTimeStamp;
-	if(diffValue < 0){return;}
-	var monthC = diffValue/month,
-		weekC = diffValue/(7*day),
-		dayC = diffValue/day,
-		hourC = diffValue/hour,
-		minC = diffValue/minute,
-		result = '';
-	if(monthC>=1){
-		result="" + parseInt(monthC) + "个月前";
-	}
-	else if(weekC>=1){
-		result="" + parseInt(weekC) + "周前";
-	}
-	else if(dayC>=1){
-		result=""+ parseInt(dayC) +"天前";
-	}
-	else if(hourC>=1){
-		result=""+ parseInt(hourC) +"小时前";
-	}
-	else if(minC>=1){
-		result=""+ parseInt(minC) +"分钟前";
-	}else
-		result="刚刚";
-	return result;
-} 
-

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<widget appId="11709021" channelCode="0000" height="480" pid="" sreensize="4.5" version="00.00.0000" viewmode="application" widgetId="" width="320">
-    <name>touchui</name>
+<widget appId="11710736" channelCode="0000" height="480" pid="" sreensize="4.5" version="00.00.0000" viewmode="application" widgetId="" width="320">
+    <name>appcan</name>
     <description/>
     <author email=""/>
     <icon src="icon.png"/>
@@ -17,48 +17,4 @@
     <debug/>
     <partobfuscation/>
     <webapp/>
-        <config desc="uexJPush" type="KEY">
-        <param name="$UEXJPUSH_PACKAGE$" platform="android" value="com.financialalliance.P"/>
-        <param name="$UEXJPUSH_APPKEY$" platform="android" value="1690417806bcc60469c4a442"/>
-        <param file="uexGroupfolder/PushConfig.plist" name="$UEXJPUSH_APP_KEY$" platform="ios" value="1690417806bcc60469c4a442"/>
-        <param file="uexGroupfolder/PushConfig.plist" name="$UEXJPUSH_PUSH_CHANNEL$" platform="ios" value="TestPush"/>
-        <param file="uexGroupfolder/PushConfig.plist" name="$UEXJPUSH_APS_ENVIRONMENT$" platform="ios" value="1"/>
-    </config>
-    <config desc="uexWeiXin" type="URLSCHEME">
-        <urlScheme name="uexWeiXin" schemes="['wxd11889ac881974c4']"/>
-    </config>
-    <config desc="whiteList" type="AUTHORITY">
-        <permission info="urlSchemeWhiteList" platform="iOS">
-            <string>wechat</string>
-            <string>weixin</string>
-        </permission>
-    </config>
-    <config desc="" type="ENTITLEMENTS">
-        <entitlement type="apns" value=""/>
-    </config>
-    <config desc="privacyConfig" type="AUTHORITY">
-        <permission info="privacy" platform="iOS" type="locationWhenInUse">
-            <string>xxx需要使用定位功能</string>
-        </permission>
-        <permission info="privacy" platform="iOS" type="camera">
-            <string>xxx需要使用相机功能</string>
-        </permission>
-        <permission info="privacy" platform="iOS" type="photoLibrary">
-            <string>xxx需要使用相册功能</string>
-        </permission>
-        <permission info="privacy" platform="iOS" type="microphone">
-            <string>xxx需要使用话筒功能</string>
-        </permission>
-        <permission info="privacy" platform="iOS" type="bluetooth">
-            <string>xxx需要使用蓝牙功能</string>
-        </permission>
-    </config>
-    <config desc="uexUmeng" type="KEY">
-        <param platform="iOS" name="$uexUmeng_APPKey$" value="59edc591a40fa30361000021"/>  
-        <param platform="iOS" name="$uexUmeng_channel$" value="uex_umeng_plugin_channel"/> 
-    </config>
-    <config desc="uexUmeng" type="KEY">
-        <param platform="Android" name="$uexUmeng_APPKey$" value="59edc4ebaed1791daa00001c"/>  
-        <param platform="Android" name="$uexUmeng_channel$" value="uex_umeng_plugin_channel"/> 
-    </config>
 </widget>

@@ -4,14 +4,14 @@
 
 // debug模式,发布正式包的时候需要设置为false
 var DEBUG = false;
-var LOCAL_SERVER = false; // 是否使用本地服务
-
+var USE_LOCAL = false; // 是否使用本地服务
 // ajax调试模式
 var AJAX_DEBUG = false;
 var dom = DEBUG ? $(document) : appcan;
 
+var server_path = USE_LOCAL ? '127.0.0.1:8775' : 'http://threebang.com';
 
-var server_path = LOCAL_SERVER ? 'http://127.0.0.1:8775' : 'http://threebang.com';
+var GLOBAL_Pseudo = false; //取本地--伪代码数据标识
 
 //判断平台类型
 var winPlat = window.navigator.platform;
@@ -35,7 +35,7 @@ var constant = {
 	USERTYPE: {
 		SUPERADMIN: 0, //平台管理员 
 		ADMIN: 1, //管理员 
-		EMPLOYEE: 10, 
-		EMPLOYER: 20,
-	}
+		EMPLOYEE: 10, //雇员 
+		EMPLOYER: 20, //雇主 
+	},
 };

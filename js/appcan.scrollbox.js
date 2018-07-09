@@ -140,3 +140,143 @@
         });
     }
 })($)
+
+
+//滚动view的实例
+var scrollViewInstance;
+
+/**
+ * 初始化下拉刷新
+ *
+ * @param pullDownRefreshCallback 下拉刷新的回调
+ * @param pullUpLoadingCallback 上拉到底部的回调
+ * @param isShowTips 是否显示提示语
+ */
+function initPullDownRefresh(pullDownRefreshCallback, pullUpLoadingCallback, isShowTips,ifHideAtuoLoading) {
+    var $el = $("body");
+    var isShowTipsCurrent = true;
+    if (isShowTips != null) {
+        isShowTipsCurrent = isShowTips;
+    }
+    scrollViewInstance = $.scrollbox($el);
+    scrollViewInstance.off().on("releaseToReload", function(){
+        // pullDownRefreshCallback();
+        // if(GLOBAL_Pseudo){
+            endPullDownRefreshLately(1000);
+        // }
+    }).on("onReloading", function (a) {//if onreloading status, drag will trigger this event
+    }).on("dragToReload", function () {//到达下拉刷新的边界 drag over 30% of bounce height,will trigger this event
+    }).on("draging", function (percent) {//正在下拉on draging, this event will be triggered.
+    }).on("scrollbottom", function() {
+        pullUpLoadingCallback();
+    });
+    if (!ifHideAtuoLoading) {
+        pullDownRefresh();
+    };
+    if (isShowTipsCurrent == false) {
+        scrollViewInstance.hide();
+        return;
+    }
+
+    //提示语
+    // var STR_DRAG_FLASH = languages.getString("STR_DRAG_FLASH");
+    // var STR_RELEASE_FLASH = languages.getString("STR_RELEASE_FLASH");
+    // var STR_LOAD_MORE = languages.getString("STR_LOAD_MORE");
+    //这里可以定义下拉的样式
+    $('#draging').html('下拉刷新');
+    $('#dragToReload').html('释放刷新');
+    $('#releaseToReload').html('刷新中...');
+}
+
+/**
+ * 主动调用下拉刷新
+ */
+function pullDownRefresh() {
+    scrollViewInstance && scrollViewInstance.reload();
+}
+
+/**
+ * 禁止上拉加载
+ */
+
+function disablePullUp () {
+    disablePullUpStatus = true;
+}
+
+/**
+ * 允许上拉加载
+ */
+
+function enablePullUp() {
+    disablePullUpStatus = false;
+} 
+
+/**
+ * 延时结束下拉刷新
+ */
+function endPullDownRefreshLately(timeout) {
+    setTimeout(function () {
+        $('#draging').html('');
+        scrollViewInstance && scrollViewInstance.reset();
+    }, timeout);
+}
+
+/**
+ * 结束下拉刷新
+ */
+function endPullDownRefresh() {
+    scrollViewInstance && scrollViewInstance.reset();
+}
+
+/**
+ * [disableRefresh 禁止下拉]
+ * @return {[type]} [description]
+ */
+function disableRefresh() {
+    scrollViewInstance.stopBounce = true;
+    endPullDownRefresh();
+}
+
+
+/**
+ * [enableRefresh 使下拉可用]
+ * @return {[type]} [description]
+ */
+function enableRefresh() {
+    scrollViewInstance.stopBounce = false;
+}
+
+function loadingMoreBefore ($el) {
+    var loadingMoreHtml = '<div class="ub ub-ver ub-pc" id="dragmore"><div class="ub-f1 ub ub-pc ub-ac">';
+        loadingMoreHtml += '<div class="loading active ub-ac ub-pc">';
+        loadingMoreHtml +=  '正在加载</div></div></div>';
+    $('#dragmore').remove();
+    $el.append(loadingMoreHtml);
+}
+
+var removeDrag;
+
+function loadingDataAll ($el,fund) {
+    if (fund) {
+       return toast('已经是全部了',3000,'middle',0);
+    }
+    clearTimeout(removeDrag);
+    var loadingMoreHtml = '<div class="ub ub-pc" id="dragmore"><div class="ub ub-f1 ub-pc ub-ac">';
+        loadingMoreHtml += '<div class="ub">';
+        loadingMoreHtml +=  '已经是全部了</div></div></div>';
+    $('#dragmore').remove();
+    $el.append(loadingMoreHtml); 
+    
+     
+    removeDrag = setTimeout(function(){
+        $('#dragmore').remove();
+    }, 3600);
+}
+
+function showLoadingStatus($el) {
+    if(!$el) $el = $('.scrollbox');
+    var doc_height = $(document).height();
+    var win_height = $(window).height();
+    if (doc_height > win_height + 50 && !$('#error_msg').hasClass('active'))
+        loadingMoreBefore($el);
+}

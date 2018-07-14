@@ -233,6 +233,7 @@ function endPullDownRefresh() {
  * @return {[type]} [description]
  */
 function disableRefresh() {
+    console.log(scrollViewInstance);
     scrollViewInstance.stopBounce = true;
     endPullDownRefresh();
 }

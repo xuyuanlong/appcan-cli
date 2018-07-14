@@ -24,7 +24,7 @@
                     <div class="fa fa-1g ub-img1">
                     </div>
                 </div>
-                <h1 class="ut ub-f1 ulev-3 ut-s tx-c" tabindex="0">AppCan</h1>
+                <h1 class="ut ub-f1 ulev-3 ut-s tx-c" tabindex="0">首页</h1>
                 <div class="nav-btn" id="nav-right">
                     <div class="fa  fa-1g  ub-img1">
                     </div>
@@ -39,38 +39,42 @@
                     <div id="dragToReload" class="bounce_status reload"></div>
                     <div id="releaseToReload" class="bounce_status loading"></div>
                 </div>
-                <div id="pane0">page1</div>
-                <div id="pane1" class="uhide">page2</div>
-                <div id="pane2" class="uhide">page3</div>
-                <div id="pane3" class="uhide">page4</div>
+                <div id="pane0" class="pane">page1</div>
+                <div id="pane1" class="pane uhide">page2</div>
+                <div id="pane2" class="pane uhide">page3</div>
+                <div id="pane3" class="pane uhide">page4</div>
             </div>
             
         </div>
         <footer id="foot_menu">
         	<div class="ub tx-c">
-        		<div class="ub ub-ver ub-f1 memu_item">
+        		<div class="ub ub-ver ub-f1 memu_item menu_active">
         			<div class="ub-f1">
-        				<img class="mune-img" src="../../css/img/index/icon-zero.png" alt="首页">
+        				<img class="menu_img menu_img_d uhide"  src="../../css/img/index/zero.png" alt="首页">
+                        <img class="menu_img menu_img_s"  src="../../css/img/index/zero_c.png" alt="首页">
         			</div>
-        			<div>首页</div>
+        			<div class="menu_text">首页</div>
         		</div>
         		<div class="ub ub-ver ub-f1 memu_item">
         			<div class="ub-f1">
-        				<img class="mune-img" src="../../css/img/index/icon-one.png" alt="工作">
+        				<img class="menu_img menu_img_d" src="../../css/img/index/one.png" alt="工作">
+                        <img class="menu_img menu_img_s uhide" src="../../css/img/index/one_c.png" alt="工作">
         			</div>
-        			<div>工作</div>
+        			<div class="menu_text">工作</div>
         		</div>
         		<div class="ub ub-ver ub-f1 memu_item">
         			<div class="ub-f1">
-        				<img class="mune-img" src="../../css/img/index/icon-two.png" alt="消息">
+        				<img class="menu_img menu_img_d" src="../../css/img/index/two.png" alt="消息">
+                        <img class="menu_img menu_img_s uhide" src="../../css/img/index/two_c.png" alt="消息">
         			</div>
-        			<div>消息</div>
+        			<div class="menu_text">消息</div>
         		</div>
         		<div class="ub ub-ver ub-f1 memu_item">
         			<div class="ub-f1">
-        				<img class="mune-img" src="../../css/img/index/icon-three.png" alt="我的">
+        				<img class="menu_img menu_img_d" src="../../css/img/index/three.png" alt="我的">
+                        <img class="menu_img menu_img_s uhide" src="../../css/img/index/three_c.png" alt="我的">
         			</div>
-        			<div>我的</div>
+        			<div class="menu_text">我的</div>
         		</div>
         	</div>	
         </footer>
@@ -85,6 +89,7 @@
 	<script src="../../js/global.js"></script>
 	<!-- 页面js -->
     <script src="../../assets/mvvm/index/index.js"></script>
+    <script src="../../js/index/menu.js"></script>
     <script src="../../js/index/index.js"></script>
 </body>
 

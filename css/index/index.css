@@ -1,9 +1,7 @@
 #Header {
 	color:rgba(255,255,255,1);
 }
-#ScrollContent {
-	padding:2.63em 0em 0em 0em;
-}
+
 /* 底部菜单栏 */
 #foot_menu {
 	width: 100%;
@@ -12,7 +10,10 @@
 	border-top: 1px solid #ccc;
 	padding: 0.3em 0 0.2em;
 }
-#foot_menu .mune-img {
+#foot_menu .mune_img {
 	height: 1.5em;
 	width: 1.5em;
+}
+.menu_active .menu_text {
+	color: #090;
 }
